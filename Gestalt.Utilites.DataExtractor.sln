@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gestalt.Utilites.DataExtractor", "Gestalt.Utilites.DataExtractor\Gestalt.Utilites.DataExtractor.csproj", "{A1EB27CA-D438-409E-B395-F577A96160A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gestalt.Common", "..\gestalt_backend_common\Gestalt.Common\Gestalt.Common.csproj", "{609A79E2-55AE-44E0-B355-E5991CA320C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gestalt.Common.DAL", "..\gestalt_backend_common\Gestalt.Common.DAL\Gestalt.Common.DAL.csproj", "{9B427220-2F24-43A0-89EE-E6388717DEB3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1EB27CA-D438-409E-B395-F577A96160A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1EB27CA-D438-409E-B395-F577A96160A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1EB27CA-D438-409E-B395-F577A96160A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1EB27CA-D438-409E-B395-F577A96160A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{609A79E2-55AE-44E0-B355-E5991CA320C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{609A79E2-55AE-44E0-B355-E5991CA320C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{609A79E2-55AE-44E0-B355-E5991CA320C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{609A79E2-55AE-44E0-B355-E5991CA320C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B427220-2F24-43A0-89EE-E6388717DEB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B427220-2F24-43A0-89EE-E6388717DEB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B427220-2F24-43A0-89EE-E6388717DEB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B427220-2F24-43A0-89EE-E6388717DEB3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
