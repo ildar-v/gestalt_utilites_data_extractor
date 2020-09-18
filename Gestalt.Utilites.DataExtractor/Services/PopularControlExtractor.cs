@@ -5,6 +5,9 @@
     using System.IO;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Gestalt.Common.DAL;
+    using Gestalt.Common.DAL.Entities;
+    using Gestalt.Common.DAL.MongoDBImpl;
     using Gestalt.Common.Models;
     using Gestalt.Common.Services;
     using Microsoft.Extensions.Configuration;
@@ -15,17 +18,22 @@
     {
         private readonly ILogger<PopularControlExtractor> _logger;
         private readonly IConfiguration _configuration;
-        private readonly IMainResponseSaverService _saverService;
+        private readonly IMongoRepository<MainResponseEntity> _mainResponseEntityRepository;
+        private readonly IMongoRepository<QueryEntity> _queryEntityRepository;
 
-        public PopularControlExtractor(IConfiguration configuration, ILogger<PopularControlExtractor> logger,
-            IMainResponseSaverService saverService)
+        public PopularControlExtractor(
+            IConfiguration configuration,
+            ILogger<PopularControlExtractor> logger,
+            IMongoRepository<MainResponseEntity> mainResponseEntityRepository,
+            IMongoRepository<QueryEntity> queryEntityRepository)
         {
             _configuration = configuration;
             _logger = logger;
-            _saverService = saverService;
+            _mainResponseEntityRepository = mainResponseEntityRepository;
+            _queryEntityRepository = queryEntityRepository;
         }
 
-        private readonly int _entriesCount = 100;
+        private readonly int _entriesCount = 30;
 
         private readonly int _fromPageNumber = 1;
 
@@ -54,6 +62,7 @@
             {
                 // var filePath = path + $"{DateTime.Now.ToShortDateString()}_page_{pageNumber}.json";
                 await this.LoadAndSaveData(client, pageNumber);
+                return;
             }
 
             // Task.WaitAll(tasks.ToArray());
@@ -100,7 +109,12 @@
                 $" time elapsed = {this.MillisecondsToString(sw.ElapsedMilliseconds)}");
 
             // await File.WriteAllTextAsync(filePath, JsonConvert.SerializeObject(responseEntry));
-            await _saverService.SaveMainResponse(responseEntry);
+            var mainResponseEntity = responseEntry.GetEntity<MainResponseEntity, MainResponse>();
+            await _mainResponseEntityRepository.AddAsync(mainResponseEntity);
+
+            var entities = responseEntry.requests.GetEntities<QueryEntity, Queries>();
+            await _queryEntityRepository.AddManyAsync(entities);
+
             _logger.LogInformation($"---------- Page {pageNumber} saved at {DateTime.Now}");
         }
 

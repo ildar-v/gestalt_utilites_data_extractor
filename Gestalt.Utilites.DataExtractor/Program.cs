@@ -27,9 +27,7 @@
             var serviceCollection = new ServiceCollection()
                 .AddSingleton<IConfiguration>(configuration)
                 .AddLogging(configure => configure.AddSerilog())
-                .AddTransient<IRequestsService, RequestsService>()
                 .AddTransient<IDataExtractorService, DataExtractorService>()
-                .AddTransient<IMainResponseSaverService, MainResponseSaverService>()
                 .AddTransient<IPopularControlExtractor, PopularControlExtractor>()
                 .AddMongo(configuration);
 
