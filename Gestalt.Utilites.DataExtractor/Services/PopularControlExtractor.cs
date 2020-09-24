@@ -5,11 +5,9 @@
     using System.IO;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using Gestalt.Common.DAL;
-    using Gestalt.Common.DAL.Entities;
-    using Gestalt.Common.DAL.MongoDBImpl;
     using Gestalt.Common.Models;
     using Gestalt.Common.Services;
+    using Gestalt.Utilites.DataExtractor.Interfaces;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
@@ -18,26 +16,25 @@
     {
         private readonly ILogger<PopularControlExtractor> _logger;
         private readonly IConfiguration _configuration;
-        private readonly IMongoRepository<MainResponseEntity> _mainResponseEntityRepository;
-        private readonly IMongoRepository<QueryEntity> _queryEntityRepository;
+        private readonly IMainResponseSavingService _mainResponseSavingService;
 
         public PopularControlExtractor(
             IConfiguration configuration,
             ILogger<PopularControlExtractor> logger,
-            IMongoRepository<MainResponseEntity> mainResponseEntityRepository,
-            IMongoRepository<QueryEntity> queryEntityRepository)
+            IMainResponseSavingService mainResponseSavingService)
         {
             _configuration = configuration;
             _logger = logger;
-            _mainResponseEntityRepository = mainResponseEntityRepository;
-            _queryEntityRepository = queryEntityRepository;
+            _mainResponseSavingService = mainResponseSavingService;
         }
 
-        private readonly int _entriesCount = 30;
+        private readonly int _entriesPerPage = 100;
 
         private readonly int _fromPageNumber = 1;
 
-        private readonly int _pageCount = 10;
+        private int _pageCount = 10;
+
+        private bool _isPageCountCalculated = false;
 
         public async Task ExtractData()
         {
@@ -74,7 +71,7 @@
             var uri =
                 "open-gov/get-requests-list" +
                 $"?page_num={pageNumber}" +
-                $"&page_size={this._entriesCount}" +
+                $"&page_size={this._entriesPerPage}" +
                 "&own=false" +
                 "&popular= false" +
                 "&from_id=null" +
@@ -109,11 +106,12 @@
                 $" time elapsed = {this.MillisecondsToString(sw.ElapsedMilliseconds)}");
 
             // await File.WriteAllTextAsync(filePath, JsonConvert.SerializeObject(responseEntry));
-            var mainResponseEntity = responseEntry.GetEntity<MainResponseEntity, MainResponse>();
-            await _mainResponseEntityRepository.AddAsync(mainResponseEntity);
+            if (!_isPageCountCalculated)
+            {
+                this._pageCount = (int.Parse(responseEntry.count) / this._entriesPerPage) + 1;
+            }
 
-            var entities = responseEntry.requests.GetEntities<QueryEntity, Queries>();
-            await _queryEntityRepository.AddManyAsync(entities);
+            await _mainResponseSavingService.SaveAsync(responseEntry);
 
             _logger.LogInformation($"---------- Page {pageNumber} saved at {DateTime.Now}");
         }

@@ -1,5 +1,6 @@
 ﻿namespace Gestalt.Utilites.DataExtractor
 {
+    using System;
     using System.IO;
     using System.Threading.Tasks;
     using Gestalt.Common.DAL;
@@ -8,6 +9,7 @@
     using Microsoft.Extensions.Logging;
     using Serilog;
     using Gestalt.Common.Services;
+    using Gestalt.Utilites.DataExtractor.Interfaces;
     using Gestalt.Utilites.DataExtractor.Services;
 
     class Program
@@ -29,7 +31,23 @@
                 .AddLogging(configure => configure.AddSerilog())
                 .AddTransient<IDataExtractorService, DataExtractorService>()
                 .AddTransient<IPopularControlExtractor, PopularControlExtractor>()
+                .AddTransient<IMainResponseSavingService, QuerySavingService>()
                 .AddMongo(configuration);
+
+            var isFirstLoadConfig =
+                configuration["Environment:IS_FIRST_LOAD"]
+                ?? Environment.GetEnvironmentVariable("IS_FIRST_LOAD")
+                ?? "false";
+            bool.TryParse(isFirstLoadConfig, out var isSaveQueries);
+
+            if (isSaveQueries)
+            {
+                serviceCollection.AddTransient<IMainResponseSavingService, QuerySavingService>();
+            }
+            else
+            {
+                serviceCollection.AddTransient<IMainResponseSavingService, MainResponseEntitySavingService>();
+            }
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
