@@ -59,7 +59,6 @@
             {
                 // var filePath = path + $"{DateTime.Now.ToShortDateString()}_page_{pageNumber}.json";
                 await this.LoadAndSaveData(client, pageNumber);
-                return;
             }
 
             // Task.WaitAll(tasks.ToArray());
