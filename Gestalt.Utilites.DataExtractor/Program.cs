@@ -1,17 +1,18 @@
-﻿namespace Gestalt.Utilites.DataExtractor
-{
-    using System;
-    using System.IO;
-    using System.Threading.Tasks;
-    using Gestalt.Common.DAL;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
-    using Serilog;
-    using Gestalt.Common.Services;
-    using Gestalt.Utilites.DataExtractor.Interfaces;
-    using Gestalt.Utilites.DataExtractor.Services;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using Gestalt.Common.DAL;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Gestalt.Common.Services;
+using Gestalt.Utilites.DataExtractor.Interfaces;
+using Gestalt.Utilites.DataExtractor.Models;
+using Gestalt.Utilites.DataExtractor.Services;
 
+namespace Gestalt.Utilites.DataExtractor
+{
     class Program
     {
         static void Main(string[] args)
@@ -29,24 +30,25 @@
             var serviceCollection = new ServiceCollection()
                 .AddSingleton<IConfiguration>(configuration)
                 .AddLogging(configure => configure.AddSerilog())
-                .AddTransient<IDataExtractorService, DataExtractorService>()
-                .AddTransient<IPopularControlExtractor, PopularControlExtractor>()
-                .AddTransient<IMainResponseSavingService, QuerySavingService>()
+                .AddTransient<IDataService, DataService>()
+                .AddTransient<IPopularControl, PopularControl>()
+                .AddTransient<IPopularControlSavingService, RequestSavingService>()
+                .AddTransient<IPopularControlHttpClient, PopularControlHttpClient>()
                 .AddMongo(configuration);
 
             var isFirstLoadConfig =
                 configuration["Environment:IS_FIRST_LOAD"]
                 ?? Environment.GetEnvironmentVariable("IS_FIRST_LOAD")
                 ?? "false";
-            bool.TryParse(isFirstLoadConfig, out var isSaveQueries);
+            bool.TryParse(isFirstLoadConfig, out var isNeedSaveRequests);
 
-            if (isSaveQueries)
+            if (isNeedSaveRequests)
             {
-                serviceCollection.AddTransient<IMainResponseSavingService, QuerySavingService>();
+                serviceCollection.AddTransient<IPopularControlSavingService, RequestSavingService>();
             }
             else
             {
-                serviceCollection.AddTransient<IMainResponseSavingService, MainResponseEntitySavingService>();
+                serviceCollection.AddTransient<IPopularControlSavingService, ResponseListEntitySavingService>();
             }
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -55,8 +57,7 @@
             logger.LogInformation("Starting application");
 
             // do the actual work here
-            var dataExtractorService = serviceProvider.GetService<IDataExtractorService>();
-            var task = Task.Run(() => dataExtractorService.WriteToFileFromApi());
+            var task = Task.Run(() => serviceProvider.GetService<IDataService>().WriteToFileFromApi());
             task.Wait();
             logger.LogInformation("All done!");
         }
